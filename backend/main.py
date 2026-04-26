@@ -11,8 +11,8 @@ app = FastAPI()
 
 origins = [
     "http://localhost:3000",
+    "https://innomight.github.io"
 ]
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

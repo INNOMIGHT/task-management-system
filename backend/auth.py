@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 import models
 
-SECRET_KEY = "innomight-secret-key"
+SECRET_KEY = "innomight-secret-key-121975505"
 ALGORITHM = "HS256"
 
 def create_access_token(data: dict):
