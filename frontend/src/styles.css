@@ -1,0 +1,46 @@
+body {
+  background-color: #f4f6f9;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Column styles */
+.column {
+  min-height: 400px;
+  padding: 10px;
+  border-radius: 12px;
+}
+
+/* Column colors */
+.pending {
+  background-color: #fff3cd;
+}
+
+.ongoing {
+  background-color: #dbeafe;
+}
+
+.completed {
+  background-color: #d1fae5;
+}
+
+/* Task card */
+.task-card {
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  cursor: grab;
+}
+
+.task-card:hover {
+  transform: scale(1.02);
+}
+
+/* Add subtle shadow */
+.shadow-soft {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Header title */
+.app-title {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
