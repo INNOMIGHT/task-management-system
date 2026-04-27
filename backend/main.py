@@ -1,18 +1,19 @@
 from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
+
 import models
 from database import engine
-from routers import auth
+from routers import auth, clients, tasks
 from deps import get_current_user_dep
-from routers import clients
-from routers import tasks
-from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+# ✅ CORS (ONLY ONCE, BEFORE ROUTES)
 origins = [
     "http://localhost:3000",
-    "https://innomight.github.io"
+    "https://innomight.github.io",
 ]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -21,20 +22,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# DB tables
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
-
+# Routes
 app.include_router(auth.router)
+app.include_router(clients.router)
+app.include_router(tasks.router)
 
 @app.get("/")
 def root():
     return {"message": "API running"}
 
 @app.get("/me")
-def get_me(user = Depends(get_current_user_dep)):
+def get_me(user=Depends(get_current_user_dep)):
     return {"email": user.email}
-
-
-app.include_router(clients.router)
-app.include_router(tasks.router)
