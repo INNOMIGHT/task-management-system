@@ -15,7 +15,7 @@ function Navbar() {
         style={{ cursor: "pointer" }}
         onClick={() => navigate("/dashboard")}
     >
-        🚀 Innomight Task Manager
+        Innomight Task Manager
     </span>
 
     <button className="btn btn-outline-light btn-sm" onClick={logout}>
