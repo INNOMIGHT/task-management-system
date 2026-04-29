@@ -7,9 +7,12 @@ const API = axios.create({
 // attach token automatically
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
-  if (token) {
+
+  // DO NOT attach token for auth routes
+  if (token && !req.url.includes("/login") && !req.url.includes("/register")) {
     req.headers.Authorization = `Bearer ${token}`;
   }
+
   return req;
 });
 
