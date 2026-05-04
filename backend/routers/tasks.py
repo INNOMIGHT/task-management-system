@@ -190,3 +190,42 @@ def reorder_task(
     db.commit()
 
     return {"message": "Task reordered"}
+
+
+@router.post("/tasks/{task_id}/log-time")
+def add_time_log(
+    task_id: int,
+    data: schemas.TimeLogCreate,
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user_dep)
+):
+    task = db.query(models.Task).filter(models.Task.id == task_id).first()
+
+    if not task:
+        raise HTTPException(404, "Task not found")
+
+    # ownership check
+    client = db.query(models.Client).filter(models.Client.id == task.client_id).first()
+    if client.user_id != user.id:
+        raise HTTPException(403, "Not allowed")
+
+    log = models.TimeLog(
+        task_id=task_id,
+        date=data.date,
+        hours=data.hours,
+        description=data.description
+    )
+
+    db.add(log)
+    db.commit()
+
+    return {"message": "Time logged"}
+
+
+@router.get("/tasks/{task_id}/logs")
+def get_time_logs(
+    task_id: int,
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user_dep)
+):
+    return db.query(models.TimeLog).filter(models.TimeLog.task_id == task_id).all()

@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from database import Base
 import datetime
+from sqlalchemy import Date
+from sqlalchemy import Float
 
 class User(Base):
     __tablename__ = "users"
@@ -37,3 +39,16 @@ class Task(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     client = relationship("Client", back_populates="tasks")
+    time_logs = relationship("TimeLog", back_populates="task")
+
+
+class TimeLog(Base):
+    __tablename__ = "time_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    task_id = Column(Integer, ForeignKey("tasks.id"))
+    date = Column(Date)    
+    hours = Column(Float)    
+    description = Column(String, nullable=True)
+
+    task = relationship("Task", back_populates="time_logs")

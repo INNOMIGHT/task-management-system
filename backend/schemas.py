@@ -31,3 +31,8 @@ class TaskReorder(BaseModel):
     task_id: int
     new_status: str   # pending / ongoing / completed
     new_position: int
+
+class TimeLogCreate(BaseModel):
+    date: str
+    hours: int
+    description: Optional[str] = None

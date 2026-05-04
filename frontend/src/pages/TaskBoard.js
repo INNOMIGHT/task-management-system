@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import API from "../services/api";
 import Navbar from "../components/Navbar";
+import TaskModal from "../components/TaskModal";
+
 
 import {
   DragDropContext,
@@ -16,6 +18,8 @@ function TaskBoard() {
   const { id } = useParams();
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
+  const [selectedTask, setSelectedTask] = useState(null);
+
 
   const fetchTasks = async () => {
     const res = await API.get(`/tasks/client/${id}`);
@@ -119,8 +123,13 @@ function TaskBoard() {
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                               className="card p-2 mb-2 shadow-sm"
+                              onClick={() => setSelectedTask(task)}
                             >
                               <strong>{task.title}</strong>
+                              <strong>{task.title}</strong>
+                                <small className="text-muted">
+                                  {task.total_hours || 0}h
+                                </small>
                             </div>
                           )}
                         </Draggable>
@@ -134,6 +143,12 @@ function TaskBoard() {
             ))}
           </div>
         </DragDropContext>
+        {selectedTask && (
+          <TaskModal
+            task={selectedTask}
+            onClose={() => setSelectedTask(null)}
+          />
+        )}
       </div>
     </>
   );

@@ -15,3 +15,11 @@ code {
 .pending { background: #fff3cd; }
 .ongoing { background: #cce5ff; }
 .completed { background: #d4edda; }
+
+.task-card {
+  cursor: pointer;
+}
+
+.task-card:active {
+  cursor: grabbing;
+}
