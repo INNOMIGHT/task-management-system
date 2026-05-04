@@ -126,7 +126,6 @@ function TaskBoard() {
                               onClick={() => setSelectedTask(task)}
                             >
                               <strong>{task.title}</strong>
-                              <strong>{task.title}</strong>
                                 <small className="text-muted">
                                   {task.total_hours || 0}h
                                 </small>
