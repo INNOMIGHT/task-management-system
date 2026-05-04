@@ -192,7 +192,7 @@ def reorder_task(
     return {"message": "Task reordered"}
 
 
-@router.post("/tasks/{task_id}/log-time")
+@router.post("/{task_id}/log-time")
 def add_time_log(
     task_id: int,
     data: schemas.TimeLogCreate,
@@ -222,7 +222,7 @@ def add_time_log(
     return {"message": "Time logged"}
 
 
-@router.get("/tasks/{task_id}/logs")
+@router.get("/{task_id}/logs")
 def get_time_logs(
     task_id: int,
     db: Session = Depends(get_db),
