@@ -50,13 +50,32 @@ def get_tasks(
     client_id: int,
     db: Session = Depends(get_db),
     user = Depends(get_current_user_dep)
-):
+    ):
     client = db.query(models.Client).filter(models.Client.id == client_id).first()
 
     if not client or client.user_id != user.id:
         raise HTTPException(403, "Not allowed")
 
-    return db.query(models.Task).filter(models.Task.client_id == client_id).all()
+    tasks = db.query(models.Task).filter(
+    models.Task.client_id == client_id
+    ).all()
+
+    result = []
+
+    for task in tasks:
+        total_hours = sum(log.hours for log in task.time_logs)
+
+        result.append({
+            "id": task.id,
+            "title": task.title,
+            "description": task.description,
+            "status": task.status,
+            "priority": task.priority,
+            "client_id": task.client_id,
+            "total_hours": total_hours
+        })
+
+    return result
 
 
 # 🔄 Update Task (status / priority / edit)
@@ -164,7 +183,7 @@ def reorder_task(
         target_tasks = [t for t in target_tasks if t.id != task.id]
 
     # limit check (15 max)
-    if len(target_tasks) >= 15:
+    if new_status != "completed" and len(target_tasks) >= 15:
         raise HTTPException(400, "Max 15 tasks allowed in column")
 
     # insert task at new position
@@ -229,3 +248,4 @@ def get_time_logs(
     user = Depends(get_current_user_dep)
 ):
     return db.query(models.TimeLog).filter(models.TimeLog.task_id == task_id).all()
+

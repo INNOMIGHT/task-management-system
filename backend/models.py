@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from database import Base
 import datetime
@@ -40,6 +40,7 @@ class Task(Base):
 
     client = relationship("Client", back_populates="tasks")
     time_logs = relationship("TimeLog", back_populates="task")
+    archived = Column(Boolean, default=False)
 
 
 class TimeLog(Base):
