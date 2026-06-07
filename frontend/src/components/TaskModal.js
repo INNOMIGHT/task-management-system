@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 
-function TaskModal({ task, onClose }) {
+function TaskModal({ task, onClose, refreshTasks }) {
   const [logs, setLogs] = useState([]);
   const [date, setDate] = useState("");
   const [hours, setHours] = useState("");
@@ -29,6 +29,7 @@ function TaskModal({ task, onClose }) {
     setHours("");
     setDesc("");
     fetchLogs();
+    refreshTasks();
   };
 
   const totalHours = logs.reduce((sum, l) => sum + l.hours, 0);

@@ -45,25 +45,34 @@ def create_task(
 
 
 # 📋 Get tasks for a client
+from sqlalchemy import func
+
 @router.get("/client/{client_id}")
 def get_tasks(
     client_id: int,
     db: Session = Depends(get_db),
     user = Depends(get_current_user_dep)
-    ):
-    client = db.query(models.Client).filter(models.Client.id == client_id).first()
+):
+    client = db.query(models.Client).filter(
+        models.Client.id == client_id
+    ).first()
 
     if not client or client.user_id != user.id:
         raise HTTPException(403, "Not allowed")
 
     tasks = db.query(models.Task).filter(
-    models.Task.client_id == client_id
+        models.Task.client_id == client_id
     ).all()
 
     result = []
 
     for task in tasks:
-        total_hours = sum(log.hours for log in task.time_logs)
+
+        total_hours = db.query(
+            func.coalesce(func.sum(models.TimeLog.hours), 0)
+        ).filter(
+            models.TimeLog.task_id == task.id
+        ).scalar()
 
         result.append({
             "id": task.id,
@@ -72,7 +81,7 @@ def get_tasks(
             "status": task.status,
             "priority": task.priority,
             "client_id": task.client_id,
-            "total_hours": total_hours
+            "total_hours": float(total_hours)
         })
 
     return result
@@ -247,5 +256,18 @@ def get_time_logs(
     db: Session = Depends(get_db),
     user = Depends(get_current_user_dep)
 ):
-    return db.query(models.TimeLog).filter(models.TimeLog.task_id == task_id).all()
+    task = db.query(models.Task).filter(models.Task.id == task_id).first()
 
+    if not task:
+        raise HTTPException(404, "Task not found")
+
+    client = db.query(models.Client).filter(
+        models.Client.id == task.client_id
+    ).first()
+
+    if client.user_id != user.id:
+        raise HTTPException(403, "Not allowed")
+
+    return db.query(models.TimeLog).filter(
+        models.TimeLog.task_id == task_id
+    ).all()

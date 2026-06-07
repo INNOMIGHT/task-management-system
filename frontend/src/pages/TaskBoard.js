@@ -146,6 +146,7 @@ function TaskBoard() {
           <TaskModal
             task={selectedTask}
             onClose={() => setSelectedTask(null)}
+            refreshTasks={fetchTasks}
           />
         )}
       </div>
