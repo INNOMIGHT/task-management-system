@@ -81,7 +81,7 @@ function TaskBoard() {
   const token = localStorage.getItem("token");
 
   const response = await fetch(
-    `${API.defaults.baseURL}/tasks/client/${id}/export`,
+    `${API.defaults.baseURL}tasks/client/${id}/export`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
