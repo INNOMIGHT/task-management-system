@@ -125,8 +125,23 @@ function TaskBoard() {
                               className="card p-2 mb-2 shadow-sm"
                               onClick={() => setSelectedTask(task)}
                             >
+                            <div className="d-flex justify-content-between align-items-start">
                               <strong>{task.title}</strong>
-                                <small className="text-muted">
+
+                              <button
+                                className="btn btn-sm btn-outline-danger"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+
+                                  await API.patch(`/tasks/${task.id}/archive`);
+
+                                  fetchTasks();
+                                }}
+                              >
+                                Archive
+                              </button>
+                            </div>                                
+                            <small className="text-muted">
                                   {task.total_hours || 0}h
                                 </small>
                             </div>

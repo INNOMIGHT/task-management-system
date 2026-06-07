@@ -61,7 +61,8 @@ def get_tasks(
         raise HTTPException(403, "Not allowed")
 
     tasks = db.query(models.Task).filter(
-        models.Task.client_id == client_id
+        models.Task.client_id == client_id,
+        models.Task.archived == False
     ).all()
 
     result = []
@@ -271,3 +272,30 @@ def get_time_logs(
     return db.query(models.TimeLog).filter(
         models.TimeLog.task_id == task_id
     ).all()
+
+
+@router.patch("/{task_id}/archive")
+def archive_task(
+    task_id: int,
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user_dep)
+):
+    task = db.query(models.Task).filter(
+        models.Task.id == task_id
+    ).first()
+
+    if not task:
+        raise HTTPException(404, "Task not found")
+
+    client = db.query(models.Client).filter(
+        models.Client.id == task.client_id
+    ).first()
+
+    if client.user_id != user.id:
+        raise HTTPException(403, "Not allowed")
+
+    task.archived = True
+
+    db.commit()
+
+    return {"message": "Task archived"}

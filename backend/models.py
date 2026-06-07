@@ -40,7 +40,7 @@ class Task(Base):
 
     client = relationship("Client", back_populates="tasks")
     time_logs = relationship("TimeLog", back_populates="task")
-
+    archived = Column(Boolean, default=False)
 
 class TimeLog(Base):
     __tablename__ = "time_logs"
