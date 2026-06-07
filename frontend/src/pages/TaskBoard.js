@@ -77,6 +77,31 @@ function TaskBoard() {
     grouped[col].sort((a, b) => a.priority - b.priority);
   });
 
+  const downloadCSV = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${API.defaults.baseURL}/tasks/client/${id}/export`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const blob = await response.blob();
+
+  const url = window.URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `client_${id}_tasks.csv`;
+
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+};
+
   return (
     <>
       <Navbar />
@@ -96,6 +121,13 @@ function TaskBoard() {
             Add
           </button>
         </div>
+
+        <button
+          className="btn btn-success mb-3"
+          onClick={downloadCSV}
+        >
+          Download CSV
+        </button>
 
         <DragDropContext onDragEnd={handleDragEnd}>
           <div className="row">

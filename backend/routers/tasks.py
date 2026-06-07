@@ -2,6 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import models, schemas
 from deps import get_db, get_current_user_dep
+from fastapi.responses import StreamingResponse
+import pandas as pd
+from io import StringIO
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
@@ -299,3 +302,68 @@ def archive_task(
     db.commit()
 
     return {"message": "Task archived"}
+
+
+@router.get("/client/{client_id}/export")
+def export_tasks_csv(
+    client_id: int,
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user_dep)
+):
+    client = db.query(models.Client).filter(
+        models.Client.id == client_id
+    ).first()
+
+    if not client or client.user_id != user.id:
+        raise HTTPException(403, "Not allowed")
+
+    tasks = db.query(models.Task).filter(
+        models.Task.client_id == client_id
+    ).all()
+
+    rows = []
+
+    for task in tasks:
+
+        logs = db.query(models.TimeLog).filter(
+            models.TimeLog.task_id == task.id
+        ).all()
+
+        # if task has no logs still include it
+        if not logs:
+            rows.append({
+                "Task": task.title,
+                "Status": task.status,
+                "Priority": task.priority,
+                "Archived": task.archived,
+                "Date": "",
+                "Hours": "",
+                "Log Description": ""
+            })
+
+        for log in logs:
+            rows.append({
+                "Task": task.title,
+                "Status": task.status,
+                "Priority": task.priority,
+                "Archived": task.archived,
+                "Date": log.date,
+                "Hours": log.hours,
+                "Log Description": log.description
+            })
+
+    df = pd.DataFrame(rows)
+
+    stream = StringIO()
+    df.to_csv(stream, index=False)
+
+    response = StreamingResponse(
+        iter([stream.getvalue()]),
+        media_type="text/csv"
+    )
+
+    response.headers["Content-Disposition"] = (
+        f"attachment; filename=client_{client_id}_tasks.csv"
+    )
+
+    return response
