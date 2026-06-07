@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 import models, schemas
 from deps import get_db, get_current_user_dep
 from fastapi.responses import StreamingResponse
-import pandas as pd
 from io import StringIO
+import csv
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
@@ -321,7 +321,18 @@ def export_tasks_csv(
         models.Task.client_id == client_id
     ).all()
 
-    rows = []
+    output = StringIO()
+    writer = csv.writer(output)
+
+    # CSV Header
+    writer.writerow([
+        "Task",
+        "Status",
+        "Priority",
+        "Date",
+        "Hours",
+        "Log Description"
+    ])
 
     for task in tasks:
 
@@ -329,41 +340,34 @@ def export_tasks_csv(
             models.TimeLog.task_id == task.id
         ).all()
 
-        # if task has no logs still include it
+        # Include tasks with no logs
         if not logs:
-            rows.append({
-                "Task": task.title,
-                "Status": task.status,
-                "Priority": task.priority,
-                "Archived": task.archived,
-                "Date": "",
-                "Hours": "",
-                "Log Description": ""
-            })
+            writer.writerow([
+                task.title,
+                task.status,
+                task.priority,
+                "",
+                "",
+                ""
+            ])
 
         for log in logs:
-            rows.append({
-                "Task": task.title,
-                "Status": task.status,
-                "Priority": task.priority,
-                "Archived": task.archived,
-                "Date": log.date,
-                "Hours": log.hours,
-                "Log Description": log.description
-            })
+            writer.writerow([
+                task.title,
+                task.status,
+                task.priority,
+                log.date,
+                log.hours,
+                log.description
+            ])
 
-    df = pd.DataFrame(rows)
+    output.seek(0)
 
-    stream = StringIO()
-    df.to_csv(stream, index=False)
-
-    response = StreamingResponse(
-        iter([stream.getvalue()]),
-        media_type="text/csv"
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition":
+            f"attachment; filename=client_{client_id}_tasks.csv"
+        }
     )
-
-    response.headers["Content-Disposition"] = (
-        f"attachment; filename=client_{client_id}_tasks.csv"
-    )
-
-    return response
